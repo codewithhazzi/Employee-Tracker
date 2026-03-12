@@ -195,39 +195,33 @@ window.saveEdit = async function(id) {
     const emp = employees.find(e => e.id === id);
     if (!emp) return;
     
-    // Determine the date to save to. If only one day is selected in the scope, use that.
-    // Else, use today, since it's an aggregate view.
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
-    const saveDate = (fromDate && fromDate === toDate) ? fromDate : new Date().toISOString().split('T')[0];
-    
-    const currHeadsets = emp.records[saveDate]?.headsets || 0;
-    const currLeads = emp.records[saveDate]?.leads || 0;
-    
-    // Calculate the delta in the inputs vs what the computed total was currently showing
-    const viewItem = currentViewData.find(e => e.id === id);
-    const deltaHs = hs - (viewItem.computedHeadsets || 0);
-    const deltaLd = ld - (viewItem.computedLeads || 0);
-    
-    if (!emp.records[saveDate]) {
-        emp.records[saveDate] = { headsets: 0, leads: 0 };
+
+    // Only allow editing when a SINGLE date is selected
+    if (fromDate !== toDate) {
+        alert("To edit a specific record, please select a SINGLE date (set From Date and To Date to the same day).");
+        return;
     }
+
+    const saveDate = fromDate;
+
+    if (!emp.records) emp.records = {};
     
-    emp.records[saveDate].headsets += deltaHs;
-    emp.records[saveDate].leads += deltaLd;
-    
-    // Recompute total cache
+    // Directly OVERWRITE — no delta, no addition, exact replacement
+    emp.records[saveDate] = { headsets: hs, leads: ld };
+
+    // Recompute global totals from all records
     let tHs = 0, tLd = 0;
     for (const d in emp.records) {
-        tHs += emp.records[d].headsets;
-        tLd += emp.records[d].leads;
+        tHs += emp.records[d].headsets || 0;
+        tLd += emp.records[d].leads || 0;
     }
     emp.headsets = tHs;
     emp.leads = tLd;
 
-    // Use specific edit button visual state
     const saveBtn = document.querySelector(`button[onclick="saveEdit('${id}')"]`);
-    if(saveBtn) saveBtn.innerHTML = "Saving...";
+    if (saveBtn) { saveBtn.textContent = "Saving..."; saveBtn.disabled = true; }
 
     await saveSingleEmployeeToDB(emp);
     
