@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { firebaseConfig } from "./env.js";
 
@@ -43,6 +43,15 @@ export async function saveEmployeesToDB(employeesArray) {
         await Promise.all(savePromises);
     } catch (e) {
         console.error("Error saving employees array: ", e);
+    }
+}
+
+export async function deleteEmployeeFromDB(empId) {
+    try {
+        await deleteDoc(doc(db, EMPLOYEES_COLLECTION, empId));
+    } catch (e) {
+        console.error("Error deleting employee: ", e);
+        throw e;
     }
 }
 
