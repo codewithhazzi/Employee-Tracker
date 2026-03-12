@@ -73,16 +73,15 @@ function renderTable() {
                 </div>
                 <div>
                     <div class="font-bold">${escapeHTML(emp.name)}</div>
-                    ${isEditing ? `<div class="text-xs text-amber-500 font-semibold mt-0.5">⚠️ Editing existing record</div>` : ''}
                 </div>
             </td>
             <td class="px-6 py-5 text-center">
                 <input type="number" id="hs-${emp.id}" value="${headsets}" min="0"
-                    class="w-32 px-4 py-3 text-center border-2 ${isEditing ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'} rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
+                    class="w-32 px-4 py-3 text-center border-2 border-slate-200 bg-white rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
             </td>
             <td class="px-6 py-5 text-center">
                 <input type="number" id="ld-${emp.id}" value="${leads}" min="0"
-                    class="w-32 px-4 py-3 text-center border-2 ${isEditing ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'} rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
+                    class="w-32 px-4 py-3 text-center border-2 border-slate-200 bg-white rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
             </td>
         </tr>`;
     }).join('');

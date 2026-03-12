@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('toDate').value = todayStr;
     
     // Show loading state
-    document.getElementById('dashboardTable').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">
+    document.getElementById('dashboardTable').innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">
         <svg class="animate-spin h-6 w-6 text-indigo-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -66,14 +66,19 @@ window.loadRangeData = async function() {
     // Compute stats for range
     filteredData.forEach(emp => {
         let hs = 0, ld = 0;
+        let rm = [];
         for (const dateStr in emp.records) {
             if ((!fromDate || dateStr >= fromDate) && (!toDate || dateStr <= toDate)) {
                 hs += emp.records[dateStr].headsets || 0;
                 ld += emp.records[dateStr].leads || 0;
+                if (emp.records[dateStr].remarks) {
+                    rm.push(emp.records[dateStr].remarks);
+                }
             }
         }
         emp.computedHeadsets = hs;
         emp.computedLeads = ld;
+        emp.computedRemarks = rm.join(' | ');
     });
     
     currentViewData = filteredData;
@@ -120,13 +125,14 @@ function updateTable(data = currentViewData) {
     const tbody = document.getElementById('dashboardTable');
     
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 font-bold bg-white/50 rounded-b-3xl">No performance records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-500 font-bold bg-white/50 rounded-b-3xl">No performance records found.</td></tr>`;
         return;
     }
     
     tbody.innerHTML = data.map(emp => {
         const hs = emp.computedHeadsets !== undefined ? emp.computedHeadsets : emp.headsets;
         const ld = emp.computedLeads !== undefined ? emp.computedLeads : emp.leads;
+        const rm = emp.computedRemarks !== undefined ? emp.computedRemarks : (emp.remarks || "");
         
         if (emp.id === editingId) {
             return `
@@ -142,6 +148,9 @@ function updateTable(data = currentViewData) {
                 </td>
                 <td class="px-6 py-5 text-center">
                     <input type="number" id="edit-ld-${emp.id}" value="${ld}" class="w-24 px-3 py-2 text-center border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-bold text-xl shadow-inner transition-all">
+                </td>
+                <td class="px-6 py-5 text-center">
+                    <textarea id="edit-rm-${emp.id}" class="w-full min-w-[150px] px-3 py-2 text-sm border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-medium shadow-inner transition-all resize-y min-h-[42px] placeholder:text-slate-400" placeholder="Add remarks...">${escapeHTML(rm)}</textarea>
                 </td>
                 <td class="px-6 py-5 text-center">
                     <div class="flex items-center justify-center gap-2">
@@ -162,6 +171,7 @@ function updateTable(data = currentViewData) {
             </td>
             <td class="px-6 py-5 text-center font-black text-slate-700 text-xl">${hs}</td>
             <td class="px-6 py-5 text-center font-black text-slate-700 text-xl">${ld}</td>
+            <td class="px-6 py-5 text-center text-slate-500 text-sm max-w-[150px] truncate" title="${escapeHTML(rm)}">${escapeHTML(rm) || '-'}</td>
             <td class="px-6 py-5 text-center">
                 <button onclick="editEmployee('${emp.id}')" class="opacity-0 group-hover:opacity-100 focus:opacity-100 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-xs font-bold transition-all shadow-sm">Edit Data</button>
             </td>
@@ -182,9 +192,11 @@ window.cancelEdit = function() {
 window.saveEdit = async function(id) {
     const hsInput = document.getElementById(`edit-hs-${id}`);
     const ldInput = document.getElementById(`edit-ld-${id}`);
+    const rmInput = document.getElementById(`edit-rm-${id}`);
     
     const hs = parseInt(hsInput.value) || 0;
     const ld = parseInt(ldInput.value) || 0;
+    const rm = rmInput ? rmInput.value.trim() : "";
     
     // Prevent negative numbers
     if(hs < 0 || ld < 0) {
@@ -209,7 +221,7 @@ window.saveEdit = async function(id) {
     if (!emp.records) emp.records = {};
     
     // Directly OVERWRITE — no delta, no addition, exact replacement
-    emp.records[saveDate] = { headsets: hs, leads: ld };
+    emp.records[saveDate] = { headsets: hs, leads: ld, remarks: rm };
 
     // Recompute global totals from all records
     let tHs = 0, tLd = 0;
@@ -259,12 +271,13 @@ function animateValue(id, start, end, duration) {
 
 window.exportDashboardToCSV = function() {
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Employee,Headsets,Leads\r\n";
+    csvContent += "Employee,Headsets,Leads,Remarks\r\n";
     
     currentViewData.forEach(emp => {
         const hs = emp.computedHeadsets !== undefined ? emp.computedHeadsets : emp.headsets;
         const ld = emp.computedLeads !== undefined ? emp.computedLeads : emp.leads;
-        csvContent += `"${emp.name.replace(/"/g, '""')}",${hs},${ld}\r\n`;
+        const rm = emp.computedRemarks !== undefined ? emp.computedRemarks : (emp.remarks || "");
+        csvContent += `"${emp.name.replace(/"/g, '""')}",${hs},${ld},"${rm.replace(/"/g, '""')}"\r\n`;
     });
     
     const encodedUri = encodeURI(csvContent);
