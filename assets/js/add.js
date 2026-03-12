@@ -42,14 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     employees = await getEmployeesFromDB();
     renderTable();
-
-    // Re-render table whenever date changes to load existing records
-    document.getElementById('date').addEventListener('change', renderTable);
 });
 
 function renderTable() {
     const tbody = document.getElementById('employeeTable');
-    const dateStr = document.getElementById('date').value;
 
     if (employees.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-12 text-center">
@@ -59,32 +55,42 @@ function renderTable() {
     }
 
     tbody.innerHTML = employees.map(emp => {
-        // Load existing data for this date if it exists
-        const existingRecord = emp.records && emp.records[dateStr] ? emp.records[dateStr] : null;
-        const headsets = existingRecord ? existingRecord.headsets : 0;
-        const leads = existingRecord ? existingRecord.leads : 0;
-        const isEditing = existingRecord !== null;
-
         return `
         <tr class="hover:bg-slate-50/80 transition-all group bg-transparent">
             <td class="px-6 py-5 font-bold text-slate-800 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black uppercase shrink-0 ring-2 ring-white shadow-sm">
+                <div class="w-10 h-10 bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black uppercase shrink-0 shadow-sm">
                     ${escapeHTML(emp.name).charAt(0)}
                 </div>
-                <div>
-                    <div class="font-bold">${escapeHTML(emp.name)}</div>
+                <div class="font-bold">${escapeHTML(emp.name)}</div>
+            </td>
+            <td class="px-6 py-5 text-center">
+                <div class="inline-flex items-center gap-2">
+                    <button type="button" onclick="stepValue('hs-${emp.id}', -1)" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-lg transition-colors shadow-sm">−</button>
+                    <input type="number" id="hs-${emp.id}" value="0" min="0"
+                        class="w-16 py-2 text-center border-2 border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-xl text-slate-700 transition-all">
+                    <button type="button" onclick="stepValue('hs-${emp.id}', 1)" class="w-9 h-9 flex items-center justify-center bg-indigo-100 hover:bg-indigo-200 text-indigo-600 font-black text-lg transition-colors shadow-sm">+</button>
                 </div>
             </td>
             <td class="px-6 py-5 text-center">
-                <input type="number" id="hs-${emp.id}" value="${headsets}" min="0"
-                    class="w-32 px-4 py-3 text-center border-2 border-slate-200 bg-white rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
-            </td>
-            <td class="px-6 py-5 text-center">
-                <input type="number" id="ld-${emp.id}" value="${leads}" min="0"
-                    class="w-32 px-4 py-3 text-center border-2 border-slate-200 bg-white rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-2xl text-slate-700 shadow-inner hover:border-indigo-300 transition-all">
+                <div class="inline-flex items-center gap-2">
+                    <button type="button" onclick="stepValue('ld-${emp.id}', -1)" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-lg transition-colors shadow-sm">−</button>
+                    <input type="number" id="ld-${emp.id}" value="0" min="0"
+                        class="w-16 py-2 text-center border-2 border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 font-black text-xl text-slate-700 transition-all">
+                    <button type="button" onclick="stepValue('ld-${emp.id}', 1)" class="w-9 h-9 flex items-center justify-center bg-emerald-100 hover:bg-emerald-200 text-emerald-600 font-black text-lg transition-colors shadow-sm">+</button>
+                </div>
             </td>
         </tr>`;
     }).join('');
+}
+
+window.stepValue = function(inputId, delta) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const newVal = Math.max(0, (parseInt(input.value) || 0) + delta);
+    input.value = newVal;
+    // Quick pop animation
+    input.classList.add('scale-110');
+    setTimeout(() => input.classList.remove('scale-110'), 120);
 }
 
 window.saveData = async function() {
@@ -101,17 +107,19 @@ window.saveData = async function() {
     btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
     btn.disabled = true;
 
-    // Overwrite data for the selected date for each employee
+    // ADD new values on top of existing records for the selected date
     employees.forEach(emp => {
-        const hs = parseInt(document.getElementById(`hs-${emp.id}`)?.value) || 0;
-        const ld = parseInt(document.getElementById(`ld-${emp.id}`)?.value) || 0;
+        const newHs = parseInt(document.getElementById(`hs-${emp.id}`)?.value) || 0;
+        const newLd = parseInt(document.getElementById(`ld-${emp.id}`)?.value) || 0;
+
+        if (newHs === 0 && newLd === 0) return;
 
         if (!emp.records) emp.records = {};
+        if (!emp.records[dateStr]) emp.records[dateStr] = { headsets: 0, leads: 0 };
 
-        // Overwrite (not add) the record for this specific date
-        emp.records[dateStr] = { headsets: hs, leads: ld };
+        emp.records[dateStr].headsets += newHs;
+        emp.records[dateStr].leads += newLd;
 
-        // Recompute global totals from all records
         let tHs = 0, tLd = 0;
         for (const d in emp.records) {
             tHs += emp.records[d].headsets || 0;
@@ -124,7 +132,7 @@ window.saveData = async function() {
     try {
         await saveEmployeesToDB(employees);
 
-        btn.innerHTML = `<span class="mr-2 text-xl">✅</span> Saved!`;
+        btn.innerHTML = `<svg class="w-5 h-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Saved!`;
         btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-slate-800');
 
@@ -139,7 +147,7 @@ window.saveData = async function() {
         }, 2000);
     } catch (e) {
         console.error('Save failed:', e);
-        btn.innerHTML = `<span class="mr-2">❌</span> Save Failed`;
+        btn.innerHTML = `<svg class="w-5 h-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg> Save Failed`;
         setTimeout(() => {
             btn.innerHTML = originalHTML;
             btn.disabled = false;
