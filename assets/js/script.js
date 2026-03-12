@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update active nav state for dashboard
     const navLinks = document.querySelectorAll('aside nav a');
     if(navLinks.length > 0) {
-        navLinks[0].classList.add('bg-indigo-600/20', 'text-indigo-300', 'border-indigo-500/20');
-        navLinks[0].classList.remove('text-slate-400', 'hover:bg-slate-800/50', 'hover:text-slate-200', 'border-transparent');
+        navLinks[0].classList.add('bg-indigo-500', 'text-white', 'shadow-lg', 'shadow-indigo-500/20', 'font-semibold');
+        navLinks[0].classList.remove('text-slate-400', 'hover:bg-slate-800', 'hover:text-white', 'font-medium');
     }
 });
 

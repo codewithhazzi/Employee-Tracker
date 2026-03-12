@@ -6,7 +6,7 @@
     .animate-fade-in-up {
         animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    
+
     .animate-slide-out {
         animation: slideOut 0.3s cubic-bezier(0.8, 0, 0.2, 1) forwards;
     }
@@ -17,6 +17,7 @@
         opacity: 0;
         transform: translateY(16px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -28,10 +29,23 @@
         opacity: 1;
         transform: translateX(0);
     }
+
     to {
         opacity: 0;
         transform: translateX(20px);
     }
+}
+
+/* ── Global: uniform border radius ── */
+*,
+*::before,
+*::after {
+    border-radius: 10px !important;
+}
+
+/* Sidebar outer container has no radius */
+aside {
+    border-radius: 0 !important;
 }
 
 body {
