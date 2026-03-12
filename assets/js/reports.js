@@ -16,13 +16,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 window.generateReports = async function() {
-    // Show quick loader
-    document.getElementById('topPerformersTable').innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-slate-500">
-        <svg class="animate-spin h-6 w-6 text-indigo-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    document.getElementById('topPerformersTable').innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 bg-white/50 rounded-b-3xl">
+        <svg class="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Fetching Analytics...</td></tr>`;
+        <p class="font-bold tracking-tight">Fetching Analytics...</p></td></tr>`;
 
     const employees = await getEmployeesFromDB();
     const days = document.getElementById('timeRange').value;
@@ -80,26 +79,26 @@ window.generateReports = async function() {
     const tbody = document.getElementById('topPerformersTable');
     
     if (topPerformers.length === 0 || topPerformers[0].leads === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-slate-500">No performance data found for this period.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 font-bold bg-white/50 rounded-b-3xl">No performance data found for this period.</td></tr>`;
     } else {
         tbody.innerHTML = topPerformers.map((emp, index) => {
             if(emp.leads === 0 && emp.headsets === 0) return '';
             
-            let badgeColor = 'bg-slate-100 text-slate-600';
-            if (index === 0) badgeColor = 'bg-amber-100 text-amber-700 font-bold';
-            if (index === 1) badgeColor = 'bg-slate-200 text-slate-700 font-bold';
-            if (index === 2) badgeColor = 'bg-orange-100 text-orange-700 font-bold';
+            let badgeColor = 'bg-slate-100 text-slate-500 border-slate-200';
+            if (index === 0) badgeColor = 'bg-amber-100 text-amber-600 border-amber-200 shadow-amber-500/20';
+            if (index === 1) badgeColor = 'bg-slate-200 text-slate-600 border-slate-300 shadow-slate-500/20';
+            if (index === 2) badgeColor = 'bg-orange-100 text-orange-600 border-orange-200 shadow-orange-500/20';
             
             return `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-6 py-4">
-                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full ${badgeColor} text-sm">
+            <tr class="hover:bg-slate-50/80 transition-all group bg-transparent">
+                <td class="px-8 py-5">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl ${badgeColor} text-base font-black border-2 shadow-sm">
                         #${index + 1}
                     </span>
                 </td>
-                <td class="px-6 py-4 font-medium text-slate-800">${escapeHTML(emp.name)}</td>
-                <td class="px-6 py-4 text-center font-semibold text-slate-600">${emp.headsets}</td>
-                <td class="px-6 py-4 text-center font-bold text-emerald-600">${emp.leads}</td>
+                <td class="px-6 py-5 font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">${escapeHTML(emp.name)}</td>
+                <td class="px-6 py-5 text-center font-bold text-slate-500 text-xl">${emp.headsets}</td>
+                <td class="px-8 py-5 text-center font-black text-emerald-500 text-2xl">${emp.leads}</td>
             </tr>
             `;
         }).join('');

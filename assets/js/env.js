@@ -1,9 +1,9 @@
 // env.js
 export const firebaseConfig = {
-    apiKey: "AIzaSyDyZzwQhx6Q-CqxUBY8zFxIosVuFCe0MQU",
-    authDomain: "tracker-d3c36.firebaseapp.com",
-    projectId: "tracker-d3c36",
-    storageBucket: "tracker-d3c36.firebasestorage.app",
-    messagingSenderId: "109015195899",
-    appId: "1:109015195899:web:a8ac4442de616bd607d05e"
+    apiKey: "AIzaSyAMvcPT20O1f6IjDEOr1N1L4l-3ZR897bw",
+    authDomain: "employee-tracker-73742.firebaseapp.com",
+    projectId: "employee-tracker-73742",
+    storageBucket: "employee-tracker-73742.firebasestorage.app",
+    messagingSenderId: "367867187832",
+    appId: "1:367867187832:web:96d21c1848bce7dd92d38d"
 };

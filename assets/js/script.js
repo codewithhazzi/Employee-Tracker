@@ -120,7 +120,7 @@ function updateTable(data = currentViewData) {
     const tbody = document.getElementById('dashboardTable');
     
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No data found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 font-bold bg-white/50 rounded-b-3xl">No performance records found.</td></tr>`;
         return;
     }
     
@@ -130,28 +130,40 @@ function updateTable(data = currentViewData) {
         
         if (emp.id === editingId) {
             return `
-            <tr class="hover:bg-slate-50 transition-colors bg-indigo-50/50">
-                <td class="px-6 py-4 font-medium text-slate-800">${escapeHTML(emp.name)}</td>
-                <td class="px-6 py-4 text-center">
-                    <input type="number" id="edit-hs-${emp.id}" value="${hs}" class="w-20 px-2 py-1 text-center border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <tr class="hover:bg-indigo-50/50 transition-colors bg-indigo-50/30 border border-indigo-100/50 relative">
+                <td class="px-6 py-5 font-bold text-slate-800 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-black uppercase shadow-md shadow-indigo-500/30 shrink-0">
+                        ${escapeHTML(emp.name).charAt(0)}
+                    </div>
+                    ${escapeHTML(emp.name)}
                 </td>
-                <td class="px-6 py-4 text-center">
-                    <input type="number" id="edit-ld-${emp.id}" value="${ld}" class="w-20 px-2 py-1 text-center border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <td class="px-6 py-5 text-center">
+                    <input type="number" id="edit-hs-${emp.id}" value="${hs}" class="w-24 px-3 py-2 text-center border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-bold text-xl shadow-inner transition-all">
                 </td>
-                <td class="px-6 py-4 text-center">
-                    <button onclick="saveEdit('${emp.id}')" class="px-3 py-1.5 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-xs font-semibold mr-2 transition-colors shadow-sm">Save</button>
-                    <button onclick="cancelEdit()" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-xs font-semibold transition-colors">Cancel</button>
+                <td class="px-6 py-5 text-center">
+                    <input type="number" id="edit-ld-${emp.id}" value="${ld}" class="w-24 px-3 py-2 text-center border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-bold text-xl shadow-inner transition-all">
+                </td>
+                <td class="px-6 py-5 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <button onclick="saveEdit('${emp.id}')" class="px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 text-xs font-bold transition-all shadow-md shadow-emerald-500/20">Save</button>
+                        <button onclick="cancelEdit()" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 text-xs font-bold transition-all shadow-sm">Cancel</button>
+                    </div>
                 </td>
             </tr>
             `;
         }
         return `
-        <tr class="hover:bg-slate-50 transition-colors group">
-            <td class="px-6 py-4 font-medium text-slate-800">${escapeHTML(emp.name)}</td>
-            <td class="px-6 py-4 text-center font-semibold text-slate-600">${hs}</td>
-            <td class="px-6 py-4 text-center font-semibold text-slate-600">${ld}</td>
-            <td class="px-6 py-4 text-center">
-                <button onclick="editEmployee('${emp.id}')" class="opacity-0 group-hover:opacity-100 focus:opacity-100 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 hover:text-indigo-700 text-xs font-semibold transition-all border border-indigo-200/50">Edit</button>
+        <tr class="hover:bg-slate-50/80 transition-all group bg-transparent">
+            <td class="px-6 py-5 font-bold text-slate-800 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black uppercase shrink-0 ring-2 ring-white shadow-sm">
+                    ${escapeHTML(emp.name).charAt(0)}
+                </div>
+                ${escapeHTML(emp.name)}
+            </td>
+            <td class="px-6 py-5 text-center font-black text-slate-700 text-xl">${hs}</td>
+            <td class="px-6 py-5 text-center font-black text-slate-700 text-xl">${ld}</td>
+            <td class="px-6 py-5 text-center">
+                <button onclick="editEmployee('${emp.id}')" class="opacity-0 group-hover:opacity-100 focus:opacity-100 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-xs font-bold transition-all shadow-sm">Edit Data</button>
             </td>
         </tr>
     `}).join('');
